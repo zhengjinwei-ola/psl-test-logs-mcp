@@ -1,102 +1,255 @@
 {
   "sources": [
     {
-      "name": "gk-activity",
+      "name": "gk-activity-api",
       "patterns": [
-        "/home/ecs-user/log/ps_gk_activity.*.log",
-        "/home/ecs-user/log/ps.gk.activity.*.log"
+        "/home/ecs-user/log/ps_gk_activity.stdout.log",
+        "/home/ecs-user/log/ps_gk_activity.stderr.log"
       ]
     },
     {
-      "name": "gk-app",
+      "name": "gk-activity-consumer",
       "patterns": [
-        "/home/ecs-user/log/ps.gk.app.*.log"
+        "/home/ecs-user/log/ps.gk.activity.consumer.stdout.log",
+        "/home/ecs-user/log/ps.gk.activity.consumer.stderr.log"
       ]
     },
     {
-      "name": "gk-broker",
+      "name": "gk-activity-scheduler",
       "patterns": [
-        "/home/ecs-user/log/ps_gk_broker.*.log"
+        "/home/ecs-user/log/ps.gk.activity.scheduler.stdout.log",
+        "/home/ecs-user/log/ps.gk.activity.scheduler.stderr.log"
       ]
     },
     {
-      "name": "gk-commodity",
+      "name": "gk-app-api",
       "patterns": [
-        "/home/ecs-user/log/ps_gk_commodity*.log"
+        "/home/ecs-user/log/ps.gk.app.stdout.log",
+        "/home/ecs-user/log/ps.gk.app.stderr.log"
       ]
     },
     {
-      "name": "gk-external",
+      "name": "gk-broker-api",
       "patterns": [
-        "/home/ecs-user/log/ps_gk_external.*.log",
-        "/home/ecs-user/log/ps.gk.external.*.log"
+        "/home/ecs-user/log/ps_gk_broker.stdout.log",
+        "/home/ecs-user/log/ps_gk_broker.stderr.log"
       ]
     },
     {
-      "name": "gk-game",
+      "name": "gk-commodity-api",
       "patterns": [
-        "/home/ecs-user/log/ps_gk_game.*.log",
-        "/home/ecs-user/log/ps.gk.game.*.log"
+        "/home/ecs-user/log/ps_gk_commodity.stdout.log",
+        "/home/ecs-user/log/ps_gk_commodity.stderr.log"
       ]
     },
     {
-      "name": "gk-gift",
+      "name": "gk-commodity-task",
       "patterns": [
-        "/home/ecs-user/log/ps.gk.gift.*.log"
+        "/home/ecs-user/log/ps_gk_commodity_task.stdout.log",
+        "/home/ecs-user/log/ps_gk_commodity_task.stderr.log"
       ]
     },
     {
-      "name": "gk-im",
+      "name": "gk-external-api",
       "patterns": [
-        "/home/ecs-user/log/ps_gk_im*.log"
+        "/home/ecs-user/log/ps_gk_external.stdout.log",
+        "/home/ecs-user/log/ps_gk_external.stderr.log"
       ]
     },
     {
-      "name": "gk-room",
+      "name": "gk-external-audit-push-consumer",
       "patterns": [
-        "/home/ecs-user/log/ps.gk.room.*.log"
+        "/home/ecs-user/log/ps.gk.external.audit_push.consumer.stdout.log",
+        "/home/ecs-user/log/ps.gk.external.audit_push.consumer.stderr.log"
       ]
     },
     {
-      "name": "gk-user",
+      "name": "gk-external-kafka-nsq-bridge",
       "patterns": [
-        "/home/ecs-user/log/ps_gk_user*.log"
+        "/home/ecs-user/log/ps.gk.external.kafka_nsq_bridge.stdout.log",
+        "/home/ecs-user/log/ps.gk.external.kafka_nsq_bridge.stderr.log"
       ]
     },
     {
-      "name": "gk-wallet",
+      "name": "gk-external-report-consumer",
       "patterns": [
-        "/home/ecs-user/log/ps.gk.wallet*.log"
+        "/home/ecs-user/log/ps.gk.external.report.consumer.stdout.log",
+        "/home/ecs-user/log/ps.gk.external.report.consumer.stderr.log"
       ]
     },
     {
-      "name": "gk-worker",
+      "name": "gk-game-api",
       "patterns": [
-        "/home/ecs-user/log/ps_gk_worker.*.log",
-        "/home/ecs-user/log/profile_cache.*.log",
-        "/home/ecs-user/log/room_cache.*.log"
+        "/home/ecs-user/log/ps_gk_game.stdout.log",
+        "/home/ecs-user/log/ps_gk_game.stderr.log"
       ]
     },
     {
-      "name": "all-gk",
+      "name": "gk-game-task",
       "patterns": [
-        "/home/ecs-user/log/ps_gk_activity.*.log",
-        "/home/ecs-user/log/ps.gk.activity.*.log",
-        "/home/ecs-user/log/ps.gk.app.*.log",
-        "/home/ecs-user/log/ps_gk_broker.*.log",
-        "/home/ecs-user/log/ps_gk_commodity*.log",
-        "/home/ecs-user/log/ps_gk_external.*.log",
-        "/home/ecs-user/log/ps.gk.external.*.log",
-        "/home/ecs-user/log/ps_gk_game.*.log",
-        "/home/ecs-user/log/ps.gk.game.*.log",
-        "/home/ecs-user/log/ps.gk.gift.*.log",
-        "/home/ecs-user/log/ps_gk_im*.log",
-        "/home/ecs-user/log/ps.gk.room.*.log",
-        "/home/ecs-user/log/ps_gk_user*.log",
-        "/home/ecs-user/log/ps.gk.wallet*.log",
-        "/home/ecs-user/log/ps_gk_worker.*.log",
-        "/home/ecs-user/log/profile_cache.*.log",
-        "/home/ecs-user/log/room_cache.*.log"
+        "/home/ecs-user/log/ps.gk.game.task.stdout.log",
+        "/home/ecs-user/log/ps.gk.game.task.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-gift-api",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.gift.stdout.log",
+        "/home/ecs-user/log/ps.gk.gift.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-gift-consumer",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.gift.consumer.stdout.log",
+        "/home/ecs-user/log/ps.gk.gift.consumer.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-gift-cron",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.gift.cron.stdout.log",
+        "/home/ecs-user/log/ps.gk.gift.cron.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-im-grpc",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_im_grpc.stdout.log",
+        "/home/ecs-user/log/ps_gk_im_grpc.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-im-consumer",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_im_cmd.stdout.log",
+        "/home/ecs-user/log/ps_gk_im_cmd.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-room-api",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.room.stdout.log",
+        "/home/ecs-user/log/ps.gk.room.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-room-exp-consumer",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.room.exp.consumer.stdout.log",
+        "/home/ecs-user/log/ps.gk.room.exp.consumer.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-room-mic-score-consumer",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.room.mic.score.consumer.stdout.log",
+        "/home/ecs-user/log/ps.gk.room.mic.score.consumer.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-room-offline-consumer",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.room.offline.consumer.stdout.log",
+        "/home/ecs-user/log/ps.gk.room.offline.consumer.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-room-online-consumer",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.room.online.consumer.stdout.log",
+        "/home/ecs-user/log/ps.gk.room.online.consumer.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-room-redpacket-consumer",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.room.redpacket.consumer.stdout.log",
+        "/home/ecs-user/log/ps.gk.room.redpacket.consumer.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-room-team-pk-gift-consumer",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.room.team.pk.gift.consumer.stdout.log",
+        "/home/ecs-user/log/ps.gk.room.team.pk.gift.consumer.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-user-api",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_user.stdout.log",
+        "/home/ecs-user/log/ps_gk_user.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-user-task",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_user_task.stdout.log",
+        "/home/ecs-user/log/ps_gk_user_task.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-wallet-api",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.wallet.stdout.log",
+        "/home/ecs-user/log/ps.gk.wallet.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-wallet-task",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.wallet.task.stdout.log",
+        "/home/ecs-user/log/ps.gk.wallet.task.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-worker-custom-kafka-es",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_worker.custom_kafka_es.stdout.log",
+        "/home/ecs-user/log/ps_gk_worker.custom_kafka_es.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-worker-dts-kafka-es",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_worker.dts_kafka_es.stdout.log",
+        "/home/ecs-user/log/ps_gk_worker.dts_kafka_es.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-worker-dts-kafka-relay",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_worker.dts_kafka_relay.stdout.log",
+        "/home/ecs-user/log/ps_gk_worker.dts_kafka_relay.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-worker-profile-cache",
+      "patterns": [
+        "/home/ecs-user/log/profile_cache.stdout.log",
+        "/home/ecs-user/log/profile_cache.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-worker-room-cache",
+      "patterns": [
+        "/home/ecs-user/log/room_cache.stdout.log",
+        "/home/ecs-user/log/room_cache.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-worker-room-online-changed",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_worker.room_online_changed.stdout.log",
+        "/home/ecs-user/log/ps_gk_worker.room_online_changed.stderr.log"
+      ]
+    },
+    {
+      "name": "gk-worker-sync-orders",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_worker.sync_orders.stdout.log",
+        "/home/ecs-user/log/ps_gk_worker.sync_orders.stderr.log"
       ]
     }
   ],

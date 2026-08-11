@@ -34,8 +34,19 @@
 示例配置已根据工作区各 `psl-be-gk-*` 仓库的 `deploy/supervisor_dev`
 文件整理，覆盖 `activity`、`app`、`broker`、`commodity`、`external`、
 `game`、`gift`、`im`、`room`、`user`、`wallet` 和 `worker`，日志根目录为
-`/home/ecs-user/log`。`all-gk` 聚合源只组合上述明确前缀，不会读取该目录下
-其他项目的日志。
+`/home/ecs-user/log`。
+
+配置严格按 Supervisor 运行进程划分：一个进程对应一个 source，该进程的
+stdout 和 stderr 放在同一个 source 中，不提供服务级或全局聚合 source。例如：
+
+- `gk-activity-api`
+- `gk-activity-consumer`
+- `gk-activity-scheduler`
+- `gk-external-report-consumer`
+- `gk-room-online-consumer`
+- `gk-worker-dts-kafka-relay`
+
+查询时直接选择目标进程的 source，避免其他进程的大日志文件先耗尽总扫描预算。
 
 配置示例见 `config/sources.example.json`。Supervisor 配置存在点号和下划线两种
 历史文件名前缀，示例已分别覆盖；worker 还包含 `profile_cache` 和 `room_cache`
@@ -198,9 +209,9 @@ mcp__psl_test_logs__list_test_log_sources
 mcp__psl_test_logs__search_test_logs
 ```
 
-先调用 `list_test_log_sources`，确认返回 `gk-activity`、`gk-user`、`gk-room`
-等 source，再执行一条小范围查询，例如 source 为 `gk-user`、query 为某个测试
-UID、limit 为 `20`。
+先调用 `list_test_log_sources`，确认返回 `gk-activity-consumer`、`gk-user-api`、
+`gk-room-online-consumer` 等细分 source，再执行一条小范围查询，例如 source 为
+`gk-activity-consumer`、query 为某个测试 UID、limit 为 `20`。
 
 ### 8. 后续升级
 
