@@ -1,19 +1,106 @@
 {
   "sources": [
     {
-      "name": "gk-user",
+      "name": "gk-activity",
       "patterns": [
-        "/data/logs/ps.gk.user/*.log"
+        "/home/ecs-user/log/ps_gk_activity.*.log",
+        "/home/ecs-user/log/ps.gk.activity.*.log"
+      ]
+    },
+    {
+      "name": "gk-app",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.app.*.log"
+      ]
+    },
+    {
+      "name": "gk-broker",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_broker.*.log"
+      ]
+    },
+    {
+      "name": "gk-commodity",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_commodity*.log"
+      ]
+    },
+    {
+      "name": "gk-external",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_external.*.log",
+        "/home/ecs-user/log/ps.gk.external.*.log"
+      ]
+    },
+    {
+      "name": "gk-game",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_game.*.log",
+        "/home/ecs-user/log/ps.gk.game.*.log"
+      ]
+    },
+    {
+      "name": "gk-gift",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.gift.*.log"
+      ]
+    },
+    {
+      "name": "gk-im",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_im*.log"
       ]
     },
     {
       "name": "gk-room",
       "patterns": [
-        "/data/logs/ps.gk.room/*.log"
+        "/home/ecs-user/log/ps.gk.room.*.log"
+      ]
+    },
+    {
+      "name": "gk-user",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_user*.log"
+      ]
+    },
+    {
+      "name": "gk-wallet",
+      "patterns": [
+        "/home/ecs-user/log/ps.gk.wallet*.log"
+      ]
+    },
+    {
+      "name": "gk-worker",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_worker.*.log",
+        "/home/ecs-user/log/profile_cache.*.log",
+        "/home/ecs-user/log/room_cache.*.log"
+      ]
+    },
+    {
+      "name": "all-gk",
+      "patterns": [
+        "/home/ecs-user/log/ps_gk_activity.*.log",
+        "/home/ecs-user/log/ps.gk.activity.*.log",
+        "/home/ecs-user/log/ps.gk.app.*.log",
+        "/home/ecs-user/log/ps_gk_broker.*.log",
+        "/home/ecs-user/log/ps_gk_commodity*.log",
+        "/home/ecs-user/log/ps_gk_external.*.log",
+        "/home/ecs-user/log/ps.gk.external.*.log",
+        "/home/ecs-user/log/ps_gk_game.*.log",
+        "/home/ecs-user/log/ps.gk.game.*.log",
+        "/home/ecs-user/log/ps.gk.gift.*.log",
+        "/home/ecs-user/log/ps_gk_im*.log",
+        "/home/ecs-user/log/ps.gk.room.*.log",
+        "/home/ecs-user/log/ps_gk_user*.log",
+        "/home/ecs-user/log/ps.gk.wallet*.log",
+        "/home/ecs-user/log/ps_gk_worker.*.log",
+        "/home/ecs-user/log/profile_cache.*.log",
+        "/home/ecs-user/log/room_cache.*.log"
       ]
     }
   ],
-  "max_files": 20,
+  "max_files": 60,
   "max_scan_bytes": 8388608,
   "max_results": 500,
   "max_line_bytes": 8192,

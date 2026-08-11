@@ -31,15 +31,23 @@
 
 ## 配置
 
-复制示例并按 005 机器的真实日志目录修改：
+示例配置已根据工作区各 `psl-be-gk-*` 仓库的 `deploy/supervisor_dev`
+文件整理，覆盖 `activity`、`app`、`broker`、`commodity`、`external`、
+`game`、`gift`、`im`、`room`、`user`、`wallet` 和 `worker`，日志根目录为
+`/home/ecs-user/log`。`all-gk` 聚合源只组合上述明确前缀，不会读取该目录下
+其他项目的日志。
+
+部署配置：
 
 ```bash
 sudo install -d -m 0750 /etc/psl-test-logs-mcp
 sudo install -m 0640 config/sources.example.json /etc/psl-test-logs-mcp/sources.json
 ```
 
-配置示例见 `config/sources.example.json`。所有 pattern 必须是绝对路径，不能包含
-`..`。启动时会解析每个 pattern 的固定根目录；匹配到的符号链接若逃出根目录会被忽略。
+配置示例见 `config/sources.example.json`。Supervisor 配置存在点号和下划线两种
+历史文件名前缀，示例已分别覆盖；worker 还包含 `profile_cache` 和 `room_cache`
+日志。所有 pattern 必须是绝对路径，不能包含 `..`。启动时会解析每个 pattern
+的固定根目录；匹配到的符号链接若逃出根目录会被忽略。
 
 建议以独立低权限用户运行，并只给该用户目标日志目录的读取权限。不要以 root 运行。
 
