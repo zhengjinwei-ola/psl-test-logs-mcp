@@ -37,13 +37,6 @@
 `/home/ecs-user/log`。`all-gk` 聚合源只组合上述明确前缀，不会读取该目录下
 其他项目的日志。
 
-部署配置：
-
-```bash
-sudo install -d -m 0750 /etc/psl-test-logs-mcp
-sudo install -m 0640 config/sources.example.json /etc/psl-test-logs-mcp/sources.json
-```
-
 配置示例见 `config/sources.example.json`。Supervisor 配置存在点号和下划线两种
 历史文件名前缀，示例已分别覆盖；worker 还包含 `profile_cache` 和 `room_cache`
 日志。所有 pattern 必须是绝对路径，不能包含 `..`。启动时会解析每个 pattern
@@ -68,21 +61,119 @@ bin/psl-test-logs-mcp-linux-amd64
 
 ## 部署到 005 测试机
 
-本仓库只准备部署产物，不自动写入测试机。上传二进制和配置后，可放置为：
+目标机器：
 
 ```text
-/opt/psl-test-logs-mcp/bin/psl-test-logs-mcp
-/etc/psl-test-logs-mcp/sources.json
+005: ps-sg-dev-002
+IP: 192.168.35.220
+用户: ecs-user
 ```
 
-远端手工验证：
+下面步骤沿用 GK 服务现有的 `gitroot`、`webroot` 和 `/home/ecs-user/log`
+目录，不需要 root 权限，也不需要部署 Supervisor 常驻进程。MCP 会在 Codex
+建立连接时启动，连接结束后退出。
+
+### 1. 登录 005
+
+在本机终端执行：
 
 ```bash
-/opt/psl-test-logs-mcp/bin/psl-test-logs-mcp \
-  --config=/etc/psl-test-logs-mcp/sources.json
+jump
 ```
 
-本地 Codex MCP 启动命令可复用 `psl-devtools-mcp` 中的 005 启动器：
+进入 GateShell 后输入 `:5` 并回车，确认终端显示的机器 IP：
+
+```bash
+hostname -I
+```
+
+输出必须包含 `192.168.35.220`。如果不是该 IP，停止后续操作。
+
+### 2. 确认日志和 Go 环境
+
+```bash
+go version
+find /home/ecs-user/log -maxdepth 1 -type f -name '*.log' | head -n 20
+```
+
+MCP SDK 要求 Go 1.25。若 `go version` 低于 1.25，构建时使用
+`GOTOOLCHAIN=auto`；测试机需要能够下载 Go 1.25 工具链。日志列表为空时先检查
+当前机器是否部署了相应 GK 服务，不要放宽配置为 `/home/ecs-user/log/*.log`。
+
+### 3. 拉取代码
+
+首次部署：
+
+```bash
+mkdir -p /home/ecs-user/gitroot
+cd /home/ecs-user/gitroot
+git clone git@github.com:zhengjinwei-ola/psl-test-logs-mcp.git
+cd psl-test-logs-mcp
+```
+
+若仓库已存在：
+
+```bash
+cd /home/ecs-user/gitroot/psl-test-logs-mcp
+git pull --ff-only origin main
+```
+
+### 4. 测试并构建
+
+```bash
+cd /home/ecs-user/gitroot/psl-test-logs-mcp
+GOTOOLCHAIN=auto go test ./...
+GOTOOLCHAIN=auto make build
+```
+
+构建产物应为 Linux x86-64 可执行文件：
+
+```bash
+file bin/psl-test-logs-mcp
+```
+
+### 5. 安装二进制和配置
+
+```bash
+mkdir -p /home/ecs-user/webroot/psl-test-logs-mcp/bin
+mkdir -p /home/ecs-user/webroot/psl-test-logs-mcp/configs
+
+install -m 0750 \
+  bin/psl-test-logs-mcp \
+  /home/ecs-user/webroot/psl-test-logs-mcp/bin/psl-test-logs-mcp
+
+install -m 0640 \
+  config/sources.example.json \
+  /home/ecs-user/webroot/psl-test-logs-mcp/configs/sources.json
+```
+
+确认安装结果和日志读取权限：
+
+```bash
+test -x /home/ecs-user/webroot/psl-test-logs-mcp/bin/psl-test-logs-mcp
+test -r /home/ecs-user/webroot/psl-test-logs-mcp/configs/sources.json
+test -r /home/ecs-user/log
+```
+
+### 6. 远端启动冒烟
+
+stdio MCP 从标准输入读取协议；使用空输入启动时应正常退出且不输出 fatal 错误：
+
+```bash
+/home/ecs-user/webroot/psl-test-logs-mcp/bin/psl-test-logs-mcp \
+  --config=/home/ecs-user/webroot/psl-test-logs-mcp/configs/sources.json \
+  </dev/null
+
+echo $?
+```
+
+退出码应为 `0`。如果提示 pattern root 不存在，说明配置中的
+`/home/ecs-user/log` 与机器不一致，应先核对部署和 Supervisor 配置，不要创建
+虚假目录掩盖问题。
+
+### 7. 在本地 Codex 注册 MCP
+
+本地启动命令复用 `psl-devtools-mcp` 中的 005 GateShell 启动器：
 
 ```json
 {
@@ -90,8 +181,8 @@ bin/psl-test-logs-mcp-linux-amd64
     "psl-test-logs": {
       "command": "/Users/oswin/ola/psl-devtools-mcp/scripts/run-ps-sg-dev-002-mcp.exp",
       "args": [
-        "/opt/psl-test-logs-mcp/bin/psl-test-logs-mcp",
-        "--config=/etc/psl-test-logs-mcp/sources.json"
+        "/home/ecs-user/webroot/psl-test-logs-mcp/bin/psl-test-logs-mcp",
+        "--config=/home/ecs-user/webroot/psl-test-logs-mcp/configs/sources.json"
       ]
     }
   }
@@ -99,6 +190,34 @@ bin/psl-test-logs-mcp-linux-amd64
 ```
 
 修改 MCP 配置后需要重启或重载 Codex 会话。
+
+重新加载后，应能发现：
+
+```text
+mcp__psl_test_logs__list_test_log_sources
+mcp__psl_test_logs__search_test_logs
+```
+
+先调用 `list_test_log_sources`，确认返回 `gk-activity`、`gk-user`、`gk-room`
+等 source，再执行一条小范围查询，例如 source 为 `gk-user`、query 为某个测试
+UID、limit 为 `20`。
+
+### 8. 后续升级
+
+```bash
+cd /home/ecs-user/gitroot/psl-test-logs-mcp
+git pull --ff-only origin main
+GOTOOLCHAIN=auto go test ./...
+GOTOOLCHAIN=auto make build
+install -m 0750 bin/psl-test-logs-mcp \
+  /home/ecs-user/webroot/psl-test-logs-mcp/bin/psl-test-logs-mcp
+install -m 0640 config/sources.example.json \
+  /home/ecs-user/webroot/psl-test-logs-mcp/configs/sources.json
+```
+
+MCP 不是常驻进程，不需要重启 Supervisor；关闭现有 Codex 会话并重新加载即可
+使用新二进制。若需要回滚，检出此前确认可用的 Git commit，重新执行测试、构建
+和 `install`，不要删除业务日志。
 
 ## 安全边界
 
