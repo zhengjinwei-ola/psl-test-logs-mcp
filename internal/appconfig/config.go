@@ -21,13 +21,26 @@ type Source struct {
 	Patterns []string `json:"patterns"`
 }
 
+type RuntimeConfigFile struct {
+	Path        string   `json:"path"`
+	AllowedKeys []string `json:"allowed_keys"`
+}
+
+type RuntimeSource struct {
+	Name        string              `json:"name"`
+	Root        string              `json:"root"`
+	Binaries    []string            `json:"binaries"`
+	ConfigFiles []RuntimeConfigFile `json:"config_files"`
+}
+
 type Config struct {
-	Sources        []Source `json:"sources"`
-	MaxFiles       int      `json:"max_files"`
-	MaxScanBytes   int64    `json:"max_scan_bytes"`
-	MaxResults     int      `json:"max_results"`
-	MaxLineBytes   int      `json:"max_line_bytes"`
-	MaxOutputBytes int      `json:"max_output_bytes"`
+	Sources        []Source        `json:"sources"`
+	MaxFiles       int             `json:"max_files"`
+	MaxScanBytes   int64           `json:"max_scan_bytes"`
+	MaxResults     int             `json:"max_results"`
+	MaxLineBytes   int             `json:"max_line_bytes"`
+	MaxOutputBytes int             `json:"max_output_bytes"`
+	RuntimeSources []RuntimeSource `json:"runtime_sources,omitempty"`
 }
 
 func Load(path string) (Config, error) {
@@ -108,6 +121,44 @@ func validate(config Config) error {
 				return fmt.Errorf("source %q pattern cannot contain ..", source.Name)
 			}
 		}
+	}
+	runtimeSeen := make(map[string]struct{}, len(config.RuntimeSources))
+	for _, source := range config.RuntimeSources {
+		if source.Name == "" || strings.ContainsAny(source.Name, " /\\") {
+			return fmt.Errorf("runtime source name %q is invalid", source.Name)
+		}
+		if _, exists := runtimeSeen[source.Name]; exists {
+			return fmt.Errorf("runtime source name %q is duplicated", source.Name)
+		}
+		runtimeSeen[source.Name] = struct{}{}
+		if !filepath.IsAbs(source.Root) || strings.Contains(source.Root, "..") {
+			return fmt.Errorf("runtime source %q root must be an absolute path without ..", source.Name)
+		}
+		if len(source.Binaries) == 0 && len(source.ConfigFiles) == 0 {
+			return fmt.Errorf("runtime source %q has no binaries or config files", source.Name)
+		}
+		for _, binary := range source.Binaries {
+			if err := validateRelativeRuntimePath(binary); err != nil {
+				return fmt.Errorf("runtime source %q binary: %w", source.Name, err)
+			}
+		}
+		for _, configFile := range source.ConfigFiles {
+			if err := validateRelativeRuntimePath(configFile.Path); err != nil {
+				return fmt.Errorf("runtime source %q config: %w", source.Name, err)
+			}
+			for _, key := range configFile.AllowedKeys {
+				if key == "" || strings.ContainsAny(key, " /\\") {
+					return fmt.Errorf("runtime source %q has invalid config key %q", source.Name, key)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func validateRelativeRuntimePath(path string) error {
+	if path == "" || filepath.IsAbs(path) || filepath.Clean(path) != path || strings.HasPrefix(path, "..") {
+		return fmt.Errorf("path %q must be a clean relative path without traversal", path)
 	}
 	return nil
 }

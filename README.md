@@ -29,6 +29,21 @@
 - 自动脱敏 Authorization、token、password、secret、cookie、session、手机号等常见敏感值。
 - 审计日志只记录 source、查询哈希、扫描量、结果数和耗时，不记录查询原文。
 
+### `trace_test_logs`
+
+在调用方明确选择的一到八个 source 中按 trace ID 做字面量关联。所有 source 共用一次
+扫描字节、结果条数和输出体积预算，避免跨服务查询放大日志 I/O；输出继续执行相同脱敏。
+
+### `list_test_runtime_sources` / `get_test_service_runtime`
+
+读取配置中精确登记的服务目录：
+
+- 使用 Go `debug/buildinfo` 读取二进制模块、Go 版本和 `vcs.revision/time/modified`。
+- 返回二进制大小和修改时间，不执行目标程序。
+- 返回配置文件 SHA256、大小、修改时间和显式白名单标量字段。
+- 拒绝 password、secret、token、cookie、数据库 DSN、主从连接和 OTEL 私有 path 等敏感 key。
+- 不暴露服务器绝对路径；文件缺失只影响对应条目，不会扩大目录读取范围。
+
 ## 配置
 
 示例配置已根据工作区各 `psl-be-gk-*` 仓库的 `deploy/supervisor_dev`
@@ -52,6 +67,9 @@ stdout 和 stderr 放在同一个 source 中，不提供服务级或全局聚合
 历史文件名前缀，示例已分别覆盖；worker 还包含 `profile_cache` 和 `room_cache`
 日志。所有 pattern 必须是绝对路径，不能包含 `..`。启动时会解析每个 pattern
 的固定根目录；匹配到的符号链接若逃出根目录会被忽略。
+
+同一配置中的 `runtime_sources` 根据各仓库 `deploy/supervisor_dev` 命令登记服务根目录、
+二进制和配置文件。客户端只能选择 source 名，不能传文件路径或配置 key。
 
 建议以独立低权限用户运行，并只给该用户目标日志目录的读取权限。不要以 root 运行。
 
@@ -184,29 +202,31 @@ echo $?
 
 ### 7. 在本地 Codex 注册 MCP
 
-本地启动命令复用 `psl-devtools-mcp` 中的 005 GateShell 启动器：
+日常使用推荐由统一 `psl-devtools` 代理本后端，Codex 只保留一个用户可见 MCP：
 
 ```json
 {
   "mcpServers": {
-    "psl-test-logs": {
-      "command": "/Users/oswin/ola/psl-devtools-mcp/scripts/run-ps-sg-dev-002-mcp.exp",
-      "args": [
-        "/home/ecs-user/webroot/psl-test-logs-mcp/bin/psl-test-logs-mcp",
-        "--config=/home/ecs-user/webroot/psl-test-logs-mcp/configs/sources.json"
-      ]
+    "psl-devtools": {
+      "command": "/Users/oswin/ola/psl-devtools-mcp/scripts/run-local-unified-mcp.sh"
     }
   }
 }
 ```
+
+`run-local-unified-mcp.sh` 内部复用 005 GateShell 启动器连接本 MCP。只有单独调试远端
+后端时才直接注册 `psl-test-logs`，避免与统一入口暴露重复工具。
 
 修改 MCP 配置后需要重启或重载 Codex 会话。
 
 重新加载后，应能发现：
 
 ```text
-mcp__psl_test_logs__list_test_log_sources
-mcp__psl_test_logs__search_test_logs
+list_test_log_sources
+search_test_logs
+trace_test_logs
+list_test_runtime_sources
+get_test_service_runtime
 ```
 
 先调用 `list_test_log_sources`，确认返回 `gk-activity-consumer`、`gk-user-api`、

@@ -33,6 +33,8 @@ func TestLoadRejectsUnsafeOrAmbiguousConfiguration(t *testing.T) {
 		{name: "parent traversal", contents: `{"sources":[{"name":"user","patterns":["/var/log/../secret/*.log"]}]}`, want: "cannot contain .."},
 		{name: "duplicate source", contents: `{"sources":[{"name":"user","patterns":["/var/log/a/*.log"]},{"name":"user","patterns":["/var/log/b/*.log"]}]}`, want: "duplicated"},
 		{name: "unknown field", contents: `{"sources":[{"name":"user","patterns":["/var/log/a/*.log"]}],"write":true}`, want: "unknown field"},
+		{name: "runtime traversal", contents: `{"sources":[{"name":"user","patterns":["/var/log/a/*.log"]}],"runtime_sources":[{"name":"user","root":"/srv/user","binaries":["../bin/app"]}]}`, want: "without traversal"},
+		{name: "runtime absolute binary", contents: `{"sources":[{"name":"user","patterns":["/var/log/a/*.log"]}],"runtime_sources":[{"name":"user","root":"/srv/user","binaries":["/bin/app"]}]}`, want: "clean relative"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

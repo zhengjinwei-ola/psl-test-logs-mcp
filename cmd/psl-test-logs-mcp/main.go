@@ -11,6 +11,7 @@ import (
 	"github.com/olaola-chat/psl-test-logs-mcp/internal/appconfig"
 	"github.com/olaola-chat/psl-test-logs-mcp/internal/logsearch"
 	"github.com/olaola-chat/psl-test-logs-mcp/internal/mcpserver"
+	"github.com/olaola-chat/psl-test-logs-mcp/internal/runtimeinfo"
 )
 
 const defaultConfigPath = "/etc/psl-test-logs-mcp/sources.json"
@@ -33,7 +34,11 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	server := mcpserver.New(service)
+	runtimeService, err := runtimeinfo.NewService(config, logger)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	server := mcpserver.New(service, runtimeService)
 	if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
 		logger.Fatal(err)
 	}

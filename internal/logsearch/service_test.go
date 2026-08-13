@@ -89,6 +89,47 @@ func TestSearchHonorsCancelledContext(t *testing.T) {
 	}
 }
 
+func TestTraceSearchesAcrossSourcesWithSharedLimit(t *testing.T) {
+	root := t.TempDir()
+	userDir := filepath.Join(root, "user")
+	roomDir := filepath.Join(root, "room")
+	if err := os.MkdirAll(userDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(roomDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	writeTestLog(t, filepath.Join(userDir, "app.log"), "trace.id=abcdef123456 user\n")
+	writeTestLog(t, filepath.Join(roomDir, "app.log"), "trace.id=abcdef123456 room password=secret\n")
+	service, err := NewService(appconfig.Config{
+		Sources: []appconfig.Source{
+			{Name: "gk-user", Patterns: []string{filepath.Join(userDir, "*.log")}},
+			{Name: "gk-room", Patterns: []string{filepath.Join(roomDir, "*.log")}},
+		},
+		MaxFiles: 3, MaxScanBytes: 4096, MaxResults: 5, MaxLineBytes: 256, MaxOutputBytes: 4096,
+	}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	output, err := service.Trace(context.Background(), TraceInput{TraceID: "abcdef123456", Sources: []string{"gk-user", "gk-room"}, Limit: 5})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(output.Entries) != 2 || !strings.Contains(output.Entries[1].Line, "[REDACTED]") {
+		t.Fatalf("output = %+v", output)
+	}
+}
+
+func TestTraceRejectsUnsafeInput(t *testing.T) {
+	service := newTestService(t, t.TempDir())
+	if _, err := service.Trace(context.Background(), TraceInput{TraceID: "short", Sources: []string{"gk-user"}}); err == nil {
+		t.Fatal("short trace id was accepted")
+	}
+	if _, err := service.Trace(context.Background(), TraceInput{TraceID: "abcdef123456", Sources: []string{"gk-user", "gk-user"}}); err == nil {
+		t.Fatal("duplicate source was accepted")
+	}
+}
+
 func TestReadTailReportsPhysicalBytesBeforeDroppingPartialLine(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "app.log")
 	writeTestLog(t, path, "first-line\nsecond-line\n")

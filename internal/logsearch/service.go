@@ -9,12 +9,15 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/olaola-chat/psl-test-logs-mcp/internal/appconfig"
 )
+
+var traceIDPattern = regexp.MustCompile(`^[A-Za-z0-9._:-]+$`)
 
 type source struct {
 	name     string
@@ -136,6 +139,84 @@ func (s *Service) Search(ctx context.Context, input SearchInput) (SearchOutput, 
 		hash := sha256.Sum256([]byte(input.Query))
 		s.logger.Printf("tool=search_test_logs source=%q query_hash=%x files=%d bytes=%d matches=%d truncated=%t duration_ms=%d",
 			input.Source, hash[:8], output.ScannedFiles, output.ScannedBytes, len(output.Matches), output.Truncated, time.Since(started).Milliseconds())
+	}
+	return output, nil
+}
+
+func (s *Service) Trace(ctx context.Context, input TraceInput) (TraceOutput, error) {
+	started := time.Now()
+	if len(input.TraceID) < 8 || len(input.TraceID) > 128 || !traceIDPattern.MatchString(input.TraceID) {
+		return TraceOutput{}, fmt.Errorf("trace_id must be 8 to 128 characters using letters, digits, dot, underscore, colon, or hyphen")
+	}
+	if len(input.Sources) < 1 || len(input.Sources) > 8 {
+		return TraceOutput{}, fmt.Errorf("sources must contain between 1 and 8 names")
+	}
+	limit := input.Limit
+	if limit == 0 {
+		limit = 200
+	}
+	if limit < 1 || limit > s.maxResults {
+		return TraceOutput{}, fmt.Errorf("limit must be between 1 and %d", s.maxResults)
+	}
+	seen := make(map[string]struct{}, len(input.Sources))
+	output := TraceOutput{Entries: make([]TraceEntry, 0)}
+	stop := false
+	for _, name := range input.Sources {
+		if _, duplicate := seen[name]; duplicate {
+			return TraceOutput{}, fmt.Errorf("source %q is duplicated", name)
+		}
+		seen[name] = struct{}{}
+		configured, ok := s.sources[name]
+		if !ok {
+			return TraceOutput{}, fmt.Errorf("unknown log source %q", name)
+		}
+		files, filesTruncated, err := s.resolveFiles(configured)
+		if err != nil {
+			return TraceOutput{}, err
+		}
+		output.Truncated = output.Truncated || filesTruncated
+		for _, file := range files {
+			if err := ctx.Err(); err != nil {
+				return TraceOutput{}, err
+			}
+			remainingScan := s.maxScanBytes - output.ScannedBytes
+			if remainingScan <= 0 || len(output.Entries) >= limit {
+				output.Truncated = true
+				break
+			}
+			readLimit := file.size
+			if readLimit > remainingScan {
+				readLimit = remainingScan
+				output.Truncated = true
+			}
+			data, readBytes, err := readTail(file.path, readLimit)
+			if err != nil {
+				return TraceOutput{}, fmt.Errorf("read log file: %w", err)
+			}
+			output.ScannedFiles++
+			output.ScannedBytes += readBytes
+			temporary := SearchOutput{Matches: make([]LogEntry, 0)}
+			s.collectMatches(ctx, &temporary, filepath.Base(file.path), data, SearchInput{Query: input.TraceID, CaseSensitive: true}, limit-len(output.Entries))
+			for _, match := range temporary.Matches {
+				if traceOutputSize(output.Entries)+len(name)+len(match.File)+len(match.Line) > s.maxOutputBytes {
+					output.Truncated = true
+					stop = true
+					break
+				}
+				output.Entries = append(output.Entries, TraceEntry{Source: name, File: match.File, Line: match.Line})
+			}
+			if stop {
+				break
+			}
+		}
+		if stop || (output.Truncated && (output.ScannedBytes >= s.maxScanBytes || len(output.Entries) >= limit || traceOutputSize(output.Entries) >= s.maxOutputBytes)) {
+			break
+		}
+	}
+	if s.logger != nil {
+		hash := sha256.Sum256([]byte(input.TraceID))
+		s.logger.Printf("tool=trace_test_logs trace_hash=%x sources=%d files=%d bytes=%d matches=%d truncated=%t duration_ms=%d",
+			hash[:8], len(input.Sources), output.ScannedFiles, output.ScannedBytes, len(output.Entries), output.Truncated, time.Since(started).Milliseconds())
 	}
 	return output, nil
 }
@@ -268,6 +349,14 @@ func outputSize(matches []LogEntry) int {
 	total := 0
 	for _, match := range matches {
 		total += len(match.File) + len(match.Line)
+	}
+	return total
+}
+
+func traceOutputSize(entries []TraceEntry) int {
+	total := 0
+	for _, entry := range entries {
+		total += len(entry.Source) + len(entry.File) + len(entry.Line)
 	}
 	return total
 }

@@ -29,3 +29,22 @@ type SearchOutput struct {
 	ScannedBytes int64      `json:"scanned_bytes"`
 	Truncated    bool       `json:"truncated"`
 }
+
+type TraceInput struct {
+	TraceID string   `json:"trace_id" jsonschema:"literal trace ID to correlate"`
+	Sources []string `json:"sources" jsonschema:"one to eight configured log source names"`
+	Limit   int      `json:"limit,omitempty" jsonschema:"maximum result lines across all sources"`
+}
+
+type TraceEntry struct {
+	Source string `json:"source"`
+	File   string `json:"file"`
+	Line   string `json:"line"`
+}
+
+type TraceOutput struct {
+	Entries      []TraceEntry `json:"entries"`
+	ScannedFiles int          `json:"scanned_files"`
+	ScannedBytes int64        `json:"scanned_bytes"`
+	Truncated    bool         `json:"truncated"`
+}

@@ -253,6 +253,140 @@
       ]
     }
   ],
+  "runtime_sources": [
+    {
+      "name": "gk-activity",
+      "root": "/home/ecs-user/webroot/psl-be-gk-activity",
+      "binaries": ["bin/grpc","bin/consumer","bin/scheduler"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-app",
+      "root": "/home/ecs-user/webroot/psl-be-gk-app",
+      "binaries": ["bin/grpc"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-broker",
+      "root": "/home/ecs-user/webroot/psl-be-gk-broker",
+      "binaries": ["bin/grpc"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-commodity",
+      "root": "/home/ecs-user/webroot/psl-be-gk-commodity",
+      "binaries": ["bin/grpc","bin/task"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-external",
+      "root": "/home/ecs-user/webroot/psl-be-gk-external",
+      "binaries": ["bin/grpc","bin/audit_push_consumer","bin/report_consumer","bin/kafka_nsq_bridge"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-game",
+      "root": "/home/ecs-user/webroot/psl-be-gk-game",
+      "binaries": ["bin/grpc","bin/task"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-gift",
+      "root": "/home/ecs-user/webroot/psl-be-gk-gift",
+      "binaries": ["bin/grpc","bin/consumer","bin/cron"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-im",
+      "root": "/home/ecs-user/webroot/psl-be-gk-im",
+      "binaries": ["bin/grpc","bin/cmd"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-room",
+      "root": "/home/ecs-user/webroot/psl-be-gk-room",
+      "binaries": ["bin/grpc","bin/room_exp_consumer","bin/team_pk_gift_consumer","bin/room_online_consumer","bin/mic_score_consumer","bin/redpacket_consumer","bin/room_offline_consumer"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-user",
+      "root": "/home/ecs-user/webroot/psl-be-gk-user",
+      "binaries": ["bin/http","bin/task"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-wallet",
+      "root": "/home/ecs-user/webroot/psl-be-gk-wallet",
+      "binaries": ["bin/grpc","bin/task"],
+      "config_files": [
+        {
+          "path": "configs/config.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    },
+    {
+      "name": "gk-worker",
+      "root": "/home/ecs-user/webroot/psl-be-gk-worker",
+      "binaries": ["bin/consumer","bin/task"],
+      "config_files": [
+        {
+          "path": "configs/config_dev.yaml",
+          "allowed_keys": ["server.env","server.http.addr","server.grpc.addr","server.grpc.metrics_addr","server.otel.service_name","log.level"]
+        }
+      ]
+    }
+  ],
   "max_files": 60,
   "max_scan_bytes": 8388608,
   "max_results": 500,
